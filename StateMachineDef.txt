@@ -1,0 +1,16 @@
+{
+  "Comment": "My test to prove passing parameters between Lambdas",
+  "StartAt": "DynamoDBReadTest",
+  "States": {
+    "DynamoDBReadTest": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:724746613050:function:DynamoDBReadTest",
+      "Next": "DynamoDBWriteTest"
+    },
+      "DynamoDBWriteTest": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-2:724746613050:function:DynamoDBWriteTest",
+      "End": true
+    }
+  }
+}
