@@ -1,0 +1,46 @@
+// giving access to the software development kit
+const AWS = require('aws-sdk');
+
+// DocumentClient abstracts the notion of attributes 
+const ddb = new AWS.DynamoDB.DocumentClient({region: 'us-east-2'});
+
+exports.handler = async (event, context, callback) => {
+    
+    // accessing the data passed in from DynamoDBReadTest
+    var data = event["body"];
+    
+    var count;
+    
+    for (count = 0; count < data.length; count++) {
+        
+        var id = data[count]["TestID"];
+        
+        var name = data[count]["Name"];
+
+    // Handling the write function call
+    await writeData(id, name).then(() => {
+        callback(null, {
+            statusCode: 201,
+            body: '',
+            headers: {
+                'Access-Control-Allow-Origin' : '*'
+            }
+        });
+    }).catch((err) => {
+        console.error(err)
+    });
+
+    }
+};
+
+// Writes to WriteTable, the new DynamoDB Table
+function writeData(id, name) {
+    const params = {
+        TableName: 'WriteTable',
+        Item: {
+            'TestID' : id,
+            'Name' : name
+        }
+    }
+    return ddb.put(params).promise();
+}
