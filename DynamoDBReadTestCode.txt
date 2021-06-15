@@ -1,0 +1,63 @@
+
+// https://medium.com/@tturnbull/passing-data-between-lambdas-with-aws-step-functions-6f8d45f717c3
+
+// giving access to the software development kit
+const AWS = require('aws-sdk');
+
+// DocumentClient abstracts the notion of attributes 
+const ddb = new AWS.DynamoDB.DocumentClient({region: 'us-east-2'});
+
+// Event Handler (main function for Lambda, this will run when trigger is activated)
+
+/*
+
+event parameter = contains information from the invoker. The invoker passes this information as a JSON-formatted string when it calls Invoke, and the runtime converts it to an object.
+
+context parameter = contains information about the invocation, function, and execution environment
+
+callback parameter = The callback function takes two arguments: an Error and a response. When you call it, Lambda waits for the event loop to be empty and then returns the response or error to the invoker
+
+*/
+
+// ids is used to print important info to the console for testing within the lambda function window in AWS.
+
+exports.handler = async (event, context, callback) => {
+    
+    let ids = [];
+
+    // wait for readIDs to be executed, then access the data acquired from readMessage
+    await readIDs().then(data => {
+        data.Items.forEach(function(item) {
+            ids.push(item.TestID);
+            console.log(item.TestID);
+        });
+        
+        callback(null, {
+            statusCode: 200, 
+            body: data.Items,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            }, 
+        });
+    
+        
+    }).catch((err) => {
+        console.error(err);
+        });
+
+};
+
+// Function to execute when the table is updated
+function readIDs() {
+    const params = {
+        TableName: 'TestTable',
+        // This limits the amount of items returned from the query
+        Limit: 20
+    }
+    //console.log(ddb.scan(params).promise());
+    return ddb.scan(params).promise();
+}
+
+
+
+
